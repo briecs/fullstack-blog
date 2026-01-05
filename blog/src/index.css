@@ -34,16 +34,38 @@
 }
 
 /* blog previews / list */
-.blog-preview {
+.preview {
   padding: 10px 16px;
   margin: 20px 0;
   border-bottom: 1px solid #fafafa;
+  display: flex;
+  align-items: center;
 }
-.blog-preview:hover {
+
+.preview:hover {
   box-shadow: 1px 3px 5px rgba(0,0,0,0.1);
 }
-.blog-preview h2 {
+
+.preview button{
+  margin-left: 5px;
+  border-radius: 8px;
+  border-width: 1px;
+  font-size: 12px;
+}
+
+.preview button:hover {
+  background-color: #565555;
+  color: #ffffff;
+}
+
+.preview h2 {
   font-size: 20px;
   color: #f1356d;
   margin-bottom: 8px;
+}
+
+.preview p {
+  font-size: 12px;
+  color: #4f4d4d;
+  margin-left: auto;
 }
