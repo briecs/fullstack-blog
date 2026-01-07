@@ -10,12 +10,10 @@ const BlogList = ({ blogs, title, handleDelete }) => {
                         <h2>{ blog.title }</h2>
                         <p>By { blog.author }</p>
                     </Link>
-                    {/* <button onClick = {() => handleDelete(blog.id)}>Delete</button> */}
                 </div>
         ))}
         </div>
     );
-
 }
     
 export default BlogList;
