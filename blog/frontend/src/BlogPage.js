@@ -1,18 +1,20 @@
-import { useHistory } from "react-router-dom";
 import useFetch from "./useFetch";
+import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
 const BlogPage = () => {
     const { id } = useParams();
-    const { data: blog, IsLoading, error } = useFetch('http://localhost:8000/blogs/' + id)
+    const { data: blog, IsLoading, error } = useFetch(`http://127.0.0.1:5000/api/posts/${id}`)
     const history = useHistory();
 
     const handleDelete = () => {
-        fetch('http://localhost:8000/blogs/' + blog.id, {
+        fetch(`http://127.0.0.1:5000/api/posts/${id}`, {
             method: 'DELETE'
-        }).then(() => {
+        })
+        .then(res => res.json())
+        .then((data) => {
+            console.log(data.msg);
             history.push('/');
-            console.log("blog deleted");
         });
     }
 
