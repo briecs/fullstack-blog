@@ -13,8 +13,9 @@
   margin: 0 auto;
   border-bottom: 1px solid #f2f2f2;
 }
-.navbar h1 {
+.navbar h1 a {
   color: #f1356d;
+  text-decoration: none;
 }
 .navbar .links {
   margin-left: auto;
