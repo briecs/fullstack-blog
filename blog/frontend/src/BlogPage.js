@@ -1,10 +1,11 @@
 import useFetch from "./useFetch";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import BlogNotFound from "./BlogNotFound";
 
 const BlogPage = () => {
     const { id } = useParams();
-    const { data: blog, IsLoading, error } = useFetch(`http://127.0.0.1:5000/api/posts/${id}`)
+    const { data: blog, IsLoading, error, errorcode } = useFetch(`http://127.0.0.1:5000/api/posts/${id}`)
     const history = useHistory();
 
     const handleDelete = () => {
@@ -18,6 +19,14 @@ const BlogPage = () => {
         });
     }
 
+    if (errorcode === 404) {
+        return <BlogNotFound title='Sorry,' message={ error } errorcode='404'/>;
+    }
+
+    if (errorcode === 500) {
+        return <BlogNotFound title='Oops!' message={ error } errorcode='500'/>
+    }
+
     return (
         <div className="blog-content">
             { IsLoading && <div>Loading...</div> }
@@ -29,7 +38,7 @@ const BlogPage = () => {
                     <div>{ blog.body }</div>
                     <button onClick={ () => handleDelete() }>Delete post</button>
                 </article>
-            ) }
+            )}
         </div>
     );
 }

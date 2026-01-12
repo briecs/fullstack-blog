@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -33,6 +33,14 @@ def get_all_posts():
     posts = Post.query.all()
     posts_to_convert = [post.to_dict() for post in posts] 
     return jsonify(posts_to_convert)
+
+@app.route("/api/posts", methods=["POST"])
+def create_post():
+    data = request.get_json()
+    post = Post(title=data.get("title"), body=data.get("body"), author=data.get("author"))
+    db.session.add(post)
+    db.session.commit()
+    return jsonify({"id": post.id, "msg":"blog successfully added"}), 201
 
 @app.route("/api/posts/<int:post_id>", methods=["GET"])
 def get_single_post(post_id):
