@@ -1,15 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
 
 * {
+  box-sizing: border-box;
   margin: 0;
   font-family: "Quicksand";
   color: #333;
 }
+
+/* content */
+.content {
+  margin: 40px auto;
+  max-width: min(60vw, 1200px);
+  padding: 20px;
+}
+
+/* navbar */
 .navbar {
   padding: 20px;
   display: flex;
   align-items: center;
-  max-width: 600px;
+  max-width: 80%;
   margin: 0 auto;
   border-bottom: 1px solid #f2f2f2;
 }
@@ -32,13 +42,8 @@
   background-color: #d82f62;
   cursor: pointer;
 }
-.content {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 20px;
-}
 
-/* blog previews / list */
+/* blog previews */
 .preview {
   padding: 10px 16px;
   margin: 20px 0;
@@ -56,18 +61,47 @@
   display: flex;
   flex-grow: 1;
   text-decoration: none;
+  width: 100%;
+  
+  position: relative;
+}
+
+.preview a::after {
+  content: attr(data-title);
+  position: absolute;
+  font-size: 14px;
+  top: 110%;
+  left: 20px;
+  color: #f1356d;
+  padding: 2px 4px;
+  border: 1px solid #33333359;
+  background-color: #ffffff;
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.preview a:hover::after {
+  opacity: 1;
 }
 
 .preview a h2 {
   font-size: 20px;
   color: #f1356d;
-  margin-bottom: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 50%;
 }
 
 .preview a p {
   font-size: 12px;
   color: #4f4d4d;
   margin-left: auto;
+  max-width: 10%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 /* blog content */
@@ -142,12 +176,13 @@
 
 /* blog not found */
 .not-found {
+  justify-content: center;
+  text-align: center;
   display: flex;
   flex-wrap: wrap;
 }
 
 .not-found h2 {
-  text-align: center;
   width: 100%;
   margin-bottom: 20px;
 }
