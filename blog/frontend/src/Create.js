@@ -10,8 +10,7 @@ const Create = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const blog = { title, body, author }
-
+        const blog = { title, body, author };
         setIsAdding(true);
 
         fetch('http://127.0.0.1:5000/api/posts', {
@@ -40,7 +39,7 @@ const Create = () => {
                 <label>Author</label>
                 <input type="text" required value={ author } onChange={(e) => setAuthor(e.target.value)}></input>
                 { !isAdding && <button>Post</button>}
-                { isAdding && <button>Blog being added...</button>}
+                { isAdding && <button disabled>Blog being added...</button>}
             </form>
         </div>
     );
