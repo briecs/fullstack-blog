@@ -12,21 +12,15 @@ const useFetch = (url) => {
         fetch(url, { signal: abortFetch.signal })
         .then(res => {
             if (!res.ok) {
-                const errordata = {
-                    message: '',
-                    code: res.status
-                };
-                if (res.status === 404) {
-                    errordata.message = 'That blog does not exist.';
-                }
-                else if (res.status === 500) {
-                    errordata.message = 'Server is not responding.';
-                }
-                else {
-                    errordata.message = 'Data not found.';
-                }
+                return res.json().then(msg => {
+                    const errordata = {
+                        message: msg.msg,
+                        code: res.status
+                    };
                 throw errordata;
-            }            
+                });
+            }
+                        
             return res.json();
         })
         .then(data => {

@@ -2,25 +2,25 @@ import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "./UserContext";
 import { useHistory } from "react-router-dom";
-
+import usePost from "./usePost";
 
 const Login = () => {
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
-    const [ isLoggingIn, setIsLoggingIn ] = useState(false);
     const history = useHistory();
     const { login } = useContext(UserContext);
+    const { startPost, isLoading, error, errorcode } = usePost('http://127.0.0.1:5000/api/login');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const loginDetails = { username, password };
-        setIsLoggingIn(true);
-
-        setTimeout(() => {
-            login(loginDetails);
-            setIsLoggingIn(false);
-            history.push('/');
-        }, 1000);
+        const regDetails = { username, password };
+        startPost(regDetails).then(postdata => {
+            if (postdata) {
+                login(postdata.username);
+                console.log(postdata.msg);
+                history.push('/');
+            }
+        });
     };
 
     return (
@@ -32,8 +32,8 @@ const Login = () => {
                 <label>Password</label>
                 <input type='password' required value={ password } onChange={(e) => setPassword(e.target.value)}></input>
                 <p>Don't have an account? <Link to='/register'>Register here</Link>.</p>
-                { !isLoggingIn && <button>Log in</button>}
-                { isLoggingIn && <button disabled>Logging in...</button>}
+                { !isLoading && <button>Log in</button>}
+                { isLoading && <button disabled>Logging in...</button>}
             </form>
         </div>
     );

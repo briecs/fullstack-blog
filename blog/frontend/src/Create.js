@@ -1,31 +1,25 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { UserContext } from "./UserContext";
+import usePost from './usePost';
 
 const Create = () => {
     const [ title,  setTitle ] = useState('');
     const [ body, setBody ] = useState('');
-    const [ author, setAuthor ] = useState('');
-    const [ isAdding, setIsAdding ] = useState(false);
+    const { user } = useContext(UserContext);
+    const { startPost, isLoading, error, errorcode } = usePost('http://127.0.0.1:5000/api/posts');
     const history = useHistory();
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const blog = { title, body, author };
-        setIsAdding(true);
+        const blog = { title, body, user };
 
-        fetch('http://127.0.0.1:5000/api/posts', {
-            method: 'POST',
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(blog)
-        }).then(res => {
-            return(
-                res.json()
-            );
-        }).then((data) => {
-            console.log(data.msg);
-            setIsAdding(false);
-            history.push(`/blogs/${ data.id }`);
-        })
+        startPost(blog).then(postdata => {
+            if (postdata) {
+                console.log(postdata.msg);
+                history.push(`/blogs/${ postdata.id }`);
+            }
+        });
     }
 
     return (
@@ -36,10 +30,8 @@ const Create = () => {
                 <input type="text" required value={ title } onChange={(e) => setTitle(e.target.value)}></input>
                 <label>Body</label>
                 <textarea required value={ body } onChange={(e) => setBody(e.target.value)}></textarea>
-                <label>Author</label>
-                <input type="text" required value={ author } onChange={(e) => setAuthor(e.target.value)}></input>
-                { !isAdding && <button>Post</button>}
-                { isAdding && <button disabled>Blog being added...</button>}
+                { !isLoading && <button>Post</button>}
+                { isLoading && <button disabled>Blog being added...</button>}
             </form>
         </div>
     );

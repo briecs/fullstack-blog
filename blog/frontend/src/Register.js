@@ -1,31 +1,31 @@
 import { useContext, useState } from "react";
 import { UserContext } from "./UserContext";
 import { useHistory } from "react-router-dom";
+import usePost from "./usePost";
 
 const Register = () => {
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
     const [ confpassword, setConfpassword ] = useState('');
-    const [ isRegistering, setIsRegistering ] = useState(false);
     const history = useHistory();
     const { login } = useContext(UserContext);
+    const { startPost, isLoading, error, errorcode } = usePost('http://127.0.0.1:5000/api/users');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
         if (password !== confpassword) {
             alert('Passwords do not match.');
             return;
         }
 
         const regDetails = { username, password };
-        setIsRegistering(true);
-
-        setTimeout(() => {
-            login(regDetails);
-            setIsRegistering(false);
-            history.push('/');
-        }, 1000);
+        startPost(regDetails).then(postdata => {
+            if (postdata) {
+                login(postdata.username);
+                console.log(postdata.msg);
+                history.push('/');
+            }
+        });
     }
 
     return (
@@ -38,8 +38,8 @@ const Register = () => {
                 <input type='password' required value={ password } onChange={(e) => setPassword(e.target.value)}></input>
                 <label>Confirm password</label>
                 <input type='password' required value={ confpassword } onChange={(e) => setConfpassword(e.target.value)}></input>
-                { !isRegistering && <button>Register</button>}
-                { isRegistering && <button disabled>Creating account...</button>}
+                { !isLoading && <button>Register</button>}
+                { isLoading && <button disabled>Creating account...</button>}
             </form>
         </div>
     );
