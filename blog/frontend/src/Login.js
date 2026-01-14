@@ -16,7 +16,7 @@ const Login = () => {
         const regDetails = { username, password };
         startPost(regDetails).then(postdata => {
             if (postdata) {
-                login(postdata.username);
+                login(postdata);
                 console.log(postdata.msg);
                 history.push('/');
             }
@@ -24,13 +24,17 @@ const Login = () => {
     };
 
     return (
-        <div>
+        <div className='login-register'>
             <h2>Login</h2>
             <form onSubmit={ handleSubmit }>
-                <label>Username</label>
-                <input type='text' required value={ username } onChange={(e) => setUsername(e.target.value)}></input>
-                <label>Password</label>
-                <input type='password' required value={ password } onChange={(e) => setPassword(e.target.value)}></input>
+                <div className='set'>
+                    <label>Username:</label>
+                    <input type='text' required value={ username } onChange={(e) => setUsername(e.target.value)}></input>
+                </div>
+                <div className='set'>
+                    <label>Password:</label>
+                    <input type='password' required value={ password } onChange={(e) => setPassword(e.target.value)}></input>
+                </div>
                 <p>Don't have an account? <Link to='/register'>Register here</Link>.</p>
                 { !isLoading && <button>Log in</button>}
                 { isLoading && <button disabled>Logging in...</button>}

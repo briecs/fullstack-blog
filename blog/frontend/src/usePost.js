@@ -9,10 +9,16 @@ const usePost = (url) => {
         setIsLoading(true);
         setError(null);
         setErrorcode(null);
+        const access_token = localStorage.getItem('access_token')
+        let headers = {'Content-Type': 'application/json'}
+
+        if (access_token) {
+            headers['Authorization'] = `Bearer ${access_token}`
+        }
 
         return fetch(url, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: JSON.stringify(data)
         }).then(res => {
             if (!res.ok) {

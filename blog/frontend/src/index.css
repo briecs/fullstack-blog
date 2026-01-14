@@ -62,7 +62,6 @@
   flex-grow: 1;
   text-decoration: none;
   width: 100%;
-  
   position: relative;
 }
 
@@ -123,20 +122,87 @@
 .blog-content article button{
   margin-left: auto;
   border-radius: 8px;
-  border-width: 1px;
+  border: 1px solid #f1356d;
   font-size: 12px;
   cursor: pointer;
+  color: #f1356d;
+  background-color: #ffffff;
 }
 
 .blog-content article button:hover {
-  background-color: #565555;
+  background-color: #f1356d;
   color: #ffffff;
+}
+
+/* login and register */
+.login-register {
+  margin: 20px;
+  text-align: center;
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+.login-register h2 {
+  font-size: 24px;
+  color: #f1356d;
+  margin: 16px 10px;
+}
+
+.login-register form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-register form .set {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin: 16px;
+}
+
+.login-register form .set input {
+  flex-grow: 1;
+  margin-left: 10px;
+}
+
+.login-register form .set label {
+  display: flex;
+  flex-direction: row;
+  color: #f1356d;
+}
+
+.login-register form p {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.login-register form p a {
+  color: #f1356d;
+}
+
+.login-register form button {
+  padding: 6px 16px;
+  color: white;
+  background-color: #f1356d;
+  border-radius: 8px;
+  border: 0;
+  text-decoration: none;
+  margin-top: 20px;
+  cursor: pointer;
+  align-self: center;
+  font-weight: bold;
 }
 
 /* create new blog */
 .create {
   margin: 20px;
   text-align: center;
+}
+
+.create h2 {
+  font-size: 24px;
+  color: #f1356d;
+  margin: 16px 10px;
 }
 
 .create button {
@@ -146,13 +212,9 @@
   border-radius: 8px;
   border: 0;
   text-decoration: none;
-  margin-top: 20px;;
-}
-
-.create h2 {
-  font-size: 20px;
-  color: #f1356d;
-  margin: 16px 10px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .create label {

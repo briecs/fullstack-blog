@@ -12,7 +12,7 @@ const Create = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const blog = { title, body, user };
+        const blog = { title, body };
 
         startPost(blog).then(postdata => {
             if (postdata) {
