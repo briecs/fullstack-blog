@@ -29,7 +29,7 @@ const Login = () => {
             <form onSubmit={ handleSubmit }>
                 <div className='set'>
                     <label>Username:</label>
-                    <input type='text' required value={ username } onChange={(e) => setUsername(e.target.value)}></input>
+                    <input type='text' autoFocus required value={ username } onChange={(e) => setUsername(e.target.value)}></input>
                 </div>
                 <div className='set'>
                     <label>Password:</label>

@@ -2,10 +2,13 @@ import useFetch from "./useFetch";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import BlogNotFound from "./BlogNotFound";
+import { useContext } from "react";
+import { UserContext } from "./UserContext";
 
 const BlogPage = () => {
     const { id } = useParams();
-    const { data: blog, IsLoading, error, errorcode } = useFetch(`http://127.0.0.1:5000/api/posts/${id}`)
+    const { data: blog, IsLoading, error, errorcode } = useFetch(`http://127.0.0.1:5000/api/posts/${id}`);
+    const { user } = useContext(UserContext);
     const history = useHistory();
 
     const handleDelete = () => {
@@ -36,7 +39,7 @@ const BlogPage = () => {
                     <h2>{ blog.title }</h2>
                     <p>By { blog.author }</p>
                     <div>{ blog.body }</div>
-                    <button onClick={ () => handleDelete() }>Delete post</button>
+                    { user && blog.id === user.id && <button onClick={ () => handleDelete() }>Delete post</button>}
                 </article>
             )}
         </div>

@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 from flask_sqlalchemy import SQLAlchemy
 import os
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
@@ -22,8 +23,14 @@ jwt = JWTManager(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.Text, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     posts = db.relationship("Post", back_populates="author", lazy=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 #defining model for posts
 class Post(db.Model):
@@ -38,7 +45,8 @@ class Post(db.Model):
             "id": self.id,
             "title": self.title,
             "body": self.body,
-            "author": self.author.username
+            "author": self.author.username,
+            "author_id": self.author_id
         }
     
 #reigistration/logging in
@@ -46,14 +54,15 @@ class Post(db.Model):
 def add_user():
     data = request.get_json()
     username = data.get("username")
-    password = data.get("password")
+    new_user = User(username=username)
 
     if User.query.filter_by(username=username).first():
         return jsonify({"msg": "That username is already taken."}), 400
     
-    new_user = User(username=username, password=password)
+    new_user.set_password(data.get("password"))
     db.session.add(new_user)
     db.session.commit()
+    db.session.refresh(new_user)
     access_token = create_access_token(identity=str(new_user.id))
     return jsonify({
         "access_token": access_token,
@@ -69,9 +78,9 @@ def check_user():
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
-    user = User.query.filter_by(username=username, password=password).first()
+    user = User.query.filter_by(username=username).first()
 
-    if user:
+    if user and user.check_password(password):
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "access_token": access_token,
@@ -88,7 +97,7 @@ def check_user():
 @app.route("/api/posts", methods=["POST"])
 @jwt_required()
 def create_post():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json()
     post = Post(title=data.get("title"), body=data.get("body"), author_id=user_id)
     db.session.add(post)
@@ -113,11 +122,16 @@ def get_single_post(post_id):
 
 #deleting posts
 @app.route("/api/posts/<int:post_id>", methods=["DELETE"])
+@jwt_required()
 def delete_post(post_id):
+    user_id = int(get_jwt_identity())
     post = Post.query.get(post_id)
 
     if not post:
         return jsonify({"msg": "Post not found, deletion failed."}), 404
+
+    if user_id != post.author_id:
+        return jsonify({"msg": "Only the original author can delete this post."}), 403
     
     db.session.delete(post)
     db.session.commit()
