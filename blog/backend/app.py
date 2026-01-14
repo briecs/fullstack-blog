@@ -49,7 +49,7 @@ class Post(db.Model):
             "author_id": self.author_id
         }
     
-#reigistration/logging in
+#registration/logging in
 @app.route("/api/register", methods=["POST"])
 def add_user():
     data = request.get_json()
