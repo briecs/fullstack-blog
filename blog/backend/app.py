@@ -1,58 +1,141 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 from flask_sqlalchemy import SQLAlchemy
 import os
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 
 CORS(app)
 
+#db set-up
 basedir = os.path.abspath(os.path.dirname("blog.db"))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "blog.db")
-#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
+#jwt set-up
+app.config["JWT_SECRET_KEY"] = "jwtsecret"
+jwt = JWTManager(app)
+
+#defining model for users
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    posts = db.relationship("Post", back_populates="author", lazy=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 #defining model for posts
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(100), nullable = False)
     body = db.Column(db.Text, nullable = False)
-    author = db.Column(db.String(50), nullable = False)
+    author = db.relationship("User", back_populates="posts")
+    author_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable = False)
 
     def to_dict(self):
         return {
             "id": self.id,
             "title": self.title,
             "body": self.body,
-            "author": self.author
+            "author": self.author.username,
+            "author_id": self.author_id
         }
+    
+#reigistration/logging in
+@app.route("/api/register", methods=["POST"])
+def add_user():
+    data = request.get_json()
+    username = data.get("username")
+    new_user = User(username=username)
 
+    if User.query.filter_by(username=username).first():
+        return jsonify({"msg": "That username is already taken."}), 400
+    
+    new_user.set_password(data.get("password"))
+    db.session.add(new_user)
+    db.session.commit()
+    db.session.refresh(new_user)
+    access_token = create_access_token(identity=str(new_user.id))
+    return jsonify({
+        "access_token": access_token,
+        "msg":"User successfully registered",
+        "user": {
+            "username": new_user.username,
+            "id": new_user.id
+            }
+        }), 201
+
+@app.route("/api/login", methods=["POST"])
+def check_user():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+    user = User.query.filter_by(username=username).first()
+
+    if user and user.check_password(password):
+        access_token = create_access_token(identity=str(user.id))
+        return jsonify({
+            "access_token": access_token,
+            "msg": f"Logged in as {user.username}.",
+            "user": {
+                "username": user.username,
+                "id": user.id
+            }
+        }), 200
+        
+    return jsonify({"msg": "Invalid username or password."}), 401
+
+#creating posts
+@app.route("/api/posts", methods=["POST"])
+@jwt_required()
+def create_post():
+    user_id = int(get_jwt_identity())
+    data = request.get_json()
+    post = Post(title=data.get("title"), body=data.get("body"), author_id=user_id)
+    db.session.add(post)
+    db.session.commit()
+    return jsonify({"id": post.id, "msg":"Blog successfully added"}), 201
+
+#getting posts
 @app.route("/api/posts", methods=["GET"])
 def get_all_posts():
     posts = Post.query.all()
-    posts_to_convert = [post.to_dict() for post in posts] 
+    posts_to_convert = [post.to_dict() for post in posts]
     return jsonify(posts_to_convert)
-
-@app.route("/api/posts", methods=["POST"])
-def create_post():
-    data = request.get_json()
-    post = Post(title=data.get("title"), body=data.get("body"), author=data.get("author"))
-    db.session.add(post)
-    db.session.commit()
-    return jsonify({"id": post.id, "msg":"blog successfully added"}), 201
 
 @app.route("/api/posts/<int:post_id>", methods=["GET"])
 def get_single_post(post_id):
-    post = Post.query.get_or_404(post_id)
+    post = Post.query.get(post_id)
+
+    if not post:
+        return jsonify({"msg": "That blog does not exist"}), 404
+    
     return jsonify(post.to_dict())
 
+#deleting posts
 @app.route("/api/posts/<int:post_id>", methods=["DELETE"])
+@jwt_required()
 def delete_post(post_id):
-    post = Post.query.get_or_404(post_id)
+    user_id = int(get_jwt_identity())
+    post = Post.query.get(post_id)
+
+    if not post:
+        return jsonify({"msg": "Post not found, deletion failed."}), 404
+
+    if user_id != post.author_id:
+        return jsonify({"msg": "Only the original author can delete this post."}), 403
+    
     db.session.delete(post)
     db.session.commit()
-    return jsonify({"msg": "post deleted"}), 200
+    return jsonify({"msg": "Post deleted"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
