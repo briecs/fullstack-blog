@@ -1,9 +1,12 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 from flask_sqlalchemy import SQLAlchemy
-import os
 from werkzeug.security import check_password_hash, generate_password_hash
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -16,7 +19,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 #jwt set-up
-app.config["JWT_SECRET_KEY"] = "jwtsecret"
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "placeholder_secret")
 jwt = JWTManager(app)
 
 #defining model for users
